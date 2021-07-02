@@ -1,0 +1,19 @@
+{
+  "name": "idleon-cheat",
+  "version": "1.0.0",
+  "description": "Cheating tool for Legends of Idleon",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js",
+    "build": "pkg main.js"
+  },
+  "author": "iBelg",
+  "license": "ISC",
+  "dependencies": {
+    "atob": "^2.1.2",
+    "btoa": "^1.2.1",
+    "chrome-remote-interface": "^0.30.0",
+    "js-beautify": "^1.13.13",
+    "prompt": "^1.1.0"
+  }
+}
