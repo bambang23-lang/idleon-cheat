@@ -7,6 +7,8 @@ const beautify = require('js-beautify');
 const prompt = require('prompt');
 const path = require('path');
 
+console.log('Version 1.1.0');
+
 const port = 32123;
 let cheatInjected = false;
 
