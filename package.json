@@ -5,10 +5,10 @@
   "main": "main.js",
   "scripts": {
     "start": "node main.js",
-    "build": "pkg main.js"
+    "build": "pkg main.js --targets node14-win-x64 --compress Brotli --output InjectCheats"
   },
   "author": "iBelg",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "atob": "^2.1.2",
     "btoa": "^1.2.1",

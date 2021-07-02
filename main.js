@@ -39,15 +39,17 @@ async function setupIntercept(hook) {
   const client = await CDP(options);
 
   const { Network, Runtime } = client;
-  console.log('Injecting cheat...');
+  console.log('Injecting cheats...');
 
   const cheats = await fs.readFile('cheats.js', 'utf8');
 
   const cheatsScript = `
   window.executeCheat = function(action) {
     const context = window.document.querySelector('iframe').contentWindow.__idleon_cheats__;
-    let fn = ${cheats};
-    return fn.call(context, action);
+
+    ${cheats}
+
+    return cheat.call(context, action);
   };
   console.log('Loaded cheats!');
   `;
@@ -56,7 +58,7 @@ async function setupIntercept(hook) {
   await Runtime.evaluate({ expression: cheatsScript });
 
   console.log('Step 1 complete...');
-  
+
   await Network.setRequestInterception(
     {
       patterns: [
@@ -71,9 +73,9 @@ async function setupIntercept(hook) {
 
   Network.requestIntercepted(async ({ interceptionId, request }) => {
     const response = await Network.getResponseBodyForInterception({ interceptionId });
-    const originalBody = beautify(atob(response.body));
+    const originalBody = atob(response.body);
     // replace some code
-    const newBody = originalBody.replace(/ab\.lime\s*?=\s*?ab\.lime\s*?\|\|\s*?\{\};/, (m) => `${m}\nsetTimeout(()=>{console.log('Cheat injected!');window.__idleon_cheats__ = u;});`);
+    const newBody = originalBody.replace(/\w+\.ApplicationMain=/, (m) => `window.__idleon_cheats__=u;${m}`);
     console.log('Step 2 complete...');
     const newHeaders = [
       `Date: ${(new Date()).toUTCString()}`,
@@ -82,7 +84,7 @@ async function setupIntercept(hook) {
       `Content-Type: text/javascript`,
     ];
     const newResponse = btoa(
-      "HTTP/1.1 200 OK\r\n" + 
+      "HTTP/1.1 200 OK\r\n" +
       newHeaders.join('\r\n') +
       "\r\n\r\n" +
       newBody
