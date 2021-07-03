@@ -7,7 +7,7 @@ const beautify = require('js-beautify');
 const prompt = require('prompt');
 const path = require('path');
 
-console.log('Version 1.1.0');
+console.log('Version 1.1.1');
 
 const port = 32123;
 let cheatInjected = false;
@@ -48,11 +48,11 @@ async function setupIntercept(hook) {
   const cheatsScript = `
   window.executeCheat = function(action) {
     const context = window.document.querySelector('iframe').contentWindow.__idleon_cheats__;
-
-    ${cheats}
-
     return cheat.call(context, action);
   };
+
+  ${cheats}
+
   console.log('Loaded cheats!');
   `;
 

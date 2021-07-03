@@ -1,6 +1,6 @@
 {
   "name": "idleon-cheat",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Cheating tool for Legends of Idleon",
   "main": "main.js",
   "scripts": {
