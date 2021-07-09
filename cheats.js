@@ -14,6 +14,8 @@ const cheatState = {
 };
 let setupDone = false;
 
+// com.stencyl.behaviour.Script has some interesting functions
+
 function registerCheat(command, fn) {
 	cheats[command] = fn;
 }
@@ -140,18 +142,42 @@ function setupMinigameProxy() {
 	};
 	const proxyFishing = new Proxy(fishingGameOver, handlerFishing);
 	bEngine.getGameAttribute("PixelHelperActor")[4].setValue('ActorEvents_229', '_customEvent_FishingGameOver', proxyFishing);
+}
 
-	const catchingGameOver = bEngine.getGameAttribute("PixelHelperActor")[4].getValue('ActorEvents_229', '_customEvent_CatchingGameOver');
-	const handlerCatching = {
-		apply: function(originalFn, context, argumentsList) {
+function setupCatchingMinigameProxy() {
+	const bEngine = this['com.stencyl.Engine'].engine;
+
+	const catchingGameGenInfo = bEngine.getGameAttribute("PixelHelperActor")[4].getValue('ActorEvents_229', '_GenInfo');
+	const handler = {
+		get: function(originalObject, property) {
 			if (cheatState.minigame.catching) {
-				return;
+				if (Number(property) === 31) {
+					return 70;
+				}
+				if (Number(property) === 33) {
+					return [95, 95, 95, 95, 95];
+				}
 			}
-			return Reflect.apply(originalFn, context, argumentsList);
+			return Reflect.get(...arguments);
 		}
 	};
-	const proxyCatching = new Proxy(catchingGameOver, handlerCatching);
-	bEngine.getGameAttribute("PixelHelperActor")[4].setValue('ActorEvents_229', '_customEvent_CatchingGameOver', proxyCatching);
+	const proxyCatching = new Proxy(catchingGameGenInfo, handler);
+	bEngine.getGameAttribute("PixelHelperActor")[4].setValue('ActorEvents_229', '_GenInfo', proxyCatching);
+}
+
+function setupGeneralInfoProxy() {
+	const bEngine = this['com.stencyl.Engine'].engine;
+	const generalInfo = bEngine.getGameAttribute("PixelHelperActor")[1].getValue("ActorEvents_116", "_GeneralINFO");
+	const handler = {
+		get: function(orignalObject, property) {
+			if (cheatState.minigame.choppin && Number(property) === 7) {
+				return [100, -1, 0, 2, 0, 220, -1, 0, -1, 0, -1, 0, 0, 220, 0, 0, 1];
+			}
+			return Reflect.get(...arguments);
+		}
+	};
+	const proxyChopping = new Proxy(generalInfo, handler);
+	bEngine.getGameAttribute("PixelHelperActor")[1].setValue("ActorEvents_116", "_GeneralINFO", proxyChopping);
 }
 
 function cheat(action) {
@@ -238,6 +264,8 @@ registerCheat('stampcost', function () {
 registerCheat('minigame', function (params) {
 	// setup needs to be repeated, because currently swapping players would break the setup.
 	setupMinigameProxy.call(this);
+	setupCatchingMinigameProxy.call(this);
+	setupGeneralInfoProxy.call(this);
 	if (!params || params.length === 0) {
 		cheatState.minigames = !cheatState.minigames;
 		return `${cheatState.minigames ? 'Activated' : 'Deactived'} unlimited minigames.`
@@ -251,14 +279,12 @@ registerCheat('minigame', function (params) {
 		return `${cheatState.minigame.fishing ? 'Activated' : 'Deactived'} minigame fishing.`
 	}
 	if (params && params[0] === 'catching') {
-		// cheatState.minigame.catching = !cheatState.minigame.catching;
-		// return `${cheatState.minigame.catching ? 'Activated' : 'Deactived'} minigame catching.`
-		return 'TODO.';
+		cheatState.minigame.catching = !cheatState.minigame.catching;
+		return `${cheatState.minigame.catching ? 'Activated' : 'Deactived'} minigame catching.`
 	}
 	if (params && params[0] === 'choppin') {
-		// cheatState.minigame.choppin = !cheatState.minigame.choppin;
-		// return `${cheatState.minigame.choppin ? 'Activated' : 'Deactived'} minigame choppin.`
-		return 'TODO.';
+		cheatState.minigame.choppin = !cheatState.minigame.choppin;
+		return `${cheatState.minigame.choppin ? 'Activated' : 'Deactived'} minigame choppin.`;
 	}
 	return `${params ? params[0] : ''} not supported.`;
 });
